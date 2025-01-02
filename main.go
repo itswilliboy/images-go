@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/jackc/pgx"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
@@ -43,7 +44,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 
 func getID() (string, error) {
 	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	id, err := gonanoid.Generate(chars, 5)
+	id, err := gonanoid.Generate(chars, 10)
 
 	if err != nil {
 		return "", err
@@ -59,29 +60,36 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 	r.ParseMultipartForm(100 << 20)
 
-	file, handler, err := r.FormFile("file")
+	file, _, err := r.FormFile("file")
 	if err != nil {
-		log.Println("Error retrieving file:")
-		fmt.Println(err)
+		log.Printf("Error while retrieving file: %v\n", err)
 		return
 	}
 	defer file.Close()
 
-	log.Printf("Uploaded File: %+v\n", handler.Filename)
-	log.Printf("File Size: %+v\n", handler.Size)
-	log.Printf("MIME Header: %+v\n", handler.Header)
+	id, err := getID()
+	if err != nil {
+		log.Printf("Error while creating ID: %v\n", err)
+		WriteJSONError(w, http.StatusInternalServerError, "Something went wrong.")
+		return
+	}
 
 	data, err := io.ReadAll(file)
-	check(err)
+	if err != nil {
+		WriteJSONError(w, http.StatusInternalServerError, "Something went wrong.")
+		return
+	}
 
-	os.WriteFile("./tmp/test.png", data, 0644)
+	mimetype := mimetype.Detect(data)
+	_, err = Conn.Exec("INSERT INTO images (id, image_data, mimetype) VALUES ($1, $2, $3)", id, data, mimetype.String())
+	if err != nil {
+		log.Printf("Database error: %s\n", err)
+		WriteJSONError(w, http.StatusInternalServerError, "Something went wrong.")
+		return
+	}
 
-	w.Header().Set("Content-Type", "application/json")
-	id, err := getID()
-	check(err)
+	io.WriteString(w, fmt.Sprintf(`{"url": "http://localhost:3000/%s%s"}`, id, mimetype.Extension()))
 
-	json := fmt.Sprintf(`{"id": "%s"}`, id)
-	io.WriteString(w, json)
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
