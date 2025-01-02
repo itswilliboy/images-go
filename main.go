@@ -38,8 +38,8 @@ func getConnection() (conn *pgx.Conn) {
 	return
 }
 
-func Ping(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Hello, world.")
+func Index(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "https://github.com/itswilliboy/images-go", http.StatusPermanentRedirect)
 }
 
 func getID() (string, error) {
@@ -124,7 +124,7 @@ func main() {
 	Conn = getConnection()
 	defer Conn.Close()
 
-	http.HandleFunc("/", Ping)
+	http.HandleFunc("/", Index)
 	http.HandleFunc("/upload", Upload)
 	http.HandleFunc("/{id}", Get)
 
