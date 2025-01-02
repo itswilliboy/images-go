@@ -58,6 +58,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		WriteJSONError(w, http.StatusMethodNotAllowed, "Method not allowed.")
 		return
 	}
+	if r.Header.Get("Authorisation") != os.Getenv("AUTH") {
+		WriteJSONError(w, http.StatusUnauthorized, "Unauthorised.")
+		return
+	}
+
 	r.ParseMultipartForm(100 << 20)
 
 	file, _, err := r.FormFile("file")
@@ -88,7 +93,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	io.WriteString(w, fmt.Sprintf(`{"url": "http://localhost:3000/%s%s"}`, id, mimetype.Extension()))
+	io.WriteString(w, fmt.Sprintf(`{"url": "https://i.itswilli.dev/%s%s"}`, id, mimetype.Extension()))
 
 }
 
