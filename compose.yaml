@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: .
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+    develop:
+      watch:
+        - path: .
+          action: sync+restart
+          target: /app
+          ignore: 
+            - ./tmp
+    volumes:
+      - ./tmp:/app/tmp
+
+
+  database:
+    image: postgres:13.14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=images
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 3001:5432
+
+volumes:
+  database:
+    driver: local
