@@ -15,8 +15,6 @@ services:
         - path: .
           action: sync+restart
           target: /app
-          ignore: 
-            - ./tmp
     volumes:
       - ./tmp:/app/tmp
 
