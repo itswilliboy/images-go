@@ -27,6 +27,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		log.Printf("Error while retrieving file: %v\n", err)
+		WriteJSONError(w, http.StatusBadRequest, "Bad request.")
 		return
 	}
 	defer file.Close()
@@ -51,7 +52,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		WriteJSONError(w, http.StatusInternalServerError, "Something went wrong.")
 		return
 	}
-
+	
 	io.WriteString(w, fmt.Sprintf(`{"url": "https://i.itswilli.dev/%s%s"}`, id, mimetype.Extension()))
 }
 

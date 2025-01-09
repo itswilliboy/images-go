@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +12,11 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
+type JSONResponse struct {
+	Status int
+	Message string
+}
+
 func check(err error) {
 	if err != nil {
 		panic(err)
@@ -19,12 +24,18 @@ func check(err error) {
 }
 
 func WriteJSONError(w http.ResponseWriter, code int, message string) {
-	json := `{"status": %d, "message": "%s"}`
-	formatted := fmt.Sprintf(json, code, message)
+	resp := &JSONResponse{Status: code, Message: message}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	io.WriteString(w, formatted)
+	
+	json, err := json.Marshal(resp)
+	
+	if err != nil {
+		io.WriteString(w, "Something went wrong.")
+	}
+
+	io.Writer.Write(w, json)
 }
 
 func getConnectionPool() *pgxpool.Pool {
