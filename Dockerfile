@@ -16,7 +16,7 @@ RUN apk add --no-cache curl
 
 
 # run server app
-FROM alpine:3.21.2
+FROM scratch
 
 # copy over SSL certificates, so that we can make HTTPS requests
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
@@ -24,7 +24,5 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifi
 COPY --from=builder /workspace/server /server
 
 EXPOSE 3000
-
-RUN apk add --no-cache curl
 
 CMD ["/server"]
