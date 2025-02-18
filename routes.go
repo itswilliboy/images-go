@@ -52,13 +52,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		WriteJSONError(w, http.StatusInternalServerError, "Something went wrong.")
 		return
 	}
-	
+
 	io.WriteString(w, fmt.Sprintf(`{"url": "https://i.itswilli.dev/%s%s"}`, id, mimetype.Extension()))
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		WriteJSONError(w, http.StatusMethodNotAllowed, "Method not alowed.")
+		WriteJSONError(w, http.StatusMethodNotAllowed, "Method not allowed.")
 		return
 	}
 
@@ -75,5 +75,4 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", mimetype)
 	w.Write(imageData)
-	w.Header().Set("Content-Type", "image/png")
 }
