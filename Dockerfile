@@ -1,5 +1,5 @@
 # build server app
-FROM golang:1.22.10-alpine3.21 AS builder
+FROM golang:1.24.0-alpine AS builder
 
 WORKDIR /workspace
 
