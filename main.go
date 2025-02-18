@@ -13,7 +13,7 @@ import (
 )
 
 type JSONResponse struct {
-	Status int
+	Status  int
 	Message string
 }
 
@@ -26,14 +26,14 @@ func check(err error) {
 func WriteJSONError(w http.ResponseWriter, code int, message string) {
 	resp := &JSONResponse{Status: code, Message: message}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	
 	json, err := json.Marshal(resp)
-	
+
 	if err != nil {
 		io.WriteString(w, "Something went wrong.")
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
 
 	io.Writer.Write(w, json)
 }
